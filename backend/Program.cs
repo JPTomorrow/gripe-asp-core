@@ -17,20 +17,20 @@ var app = builder.Build();
 
 var complaintDb = new List<Complaint>()
 {
-	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Apple", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now, 5),
-	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now, 5),
+	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   5, 3),
+	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   1, 0),
+	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   2, 2),
+	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
+	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
+	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(0, 0, "Apple", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
+	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
 };
 
 var userDb = new List<User>()
@@ -40,7 +40,9 @@ var userDb = new List<User>()
 	new User(2, "diddly", "diddly@gmail.com", "192.168.1.100", DateTime.Now),
 };
 
+//
 // COMPLAINTS ENDPOINTS
+//
 
 var complaintsApi = app.MapGroup("/complaints");
 complaintsApi.MapGet("/", () => complaintDb);
@@ -51,19 +53,20 @@ complaintsApi.MapGet("/{id}", (int id) =>
 
 complaintsApi.MapPost("/create", ([FromBody] ComplaintJson cData) =>
 {
-	var newComplaint = new Complaint(complaintDb.Max(x => x.Id) + 1, cData.UserId, cData.CompanyName, cData.Title, cData.Body, DateTime.Now, cData.StarRating);
+	var newComplaint = new Complaint(complaintDb.Max(x => x.Id) + 1, cData.UserId, cData.CompanyName, cData.Title, cData.Body, DateTime.Now, 0, 0);
 	complaintDb.Add(newComplaint);
 	return Results.Ok(newComplaint);
 });
 
-complaintsApi.MapGet("/by-user/{userId}", (int userId) => {
+complaintsApi.MapGet("/by-user/{userId}", (int userId) =>
+{
 	var complaintsByUser = complaintDb.Where(x => x.UserId == userId).ToList();
 	return Results.Ok(complaintsByUser);
 });
 
 complaintsApi.MapGet("/by-company/{companyName}", (string companyName) =>
 {
-	var matches = FuzzySearch.FuzzyMatch(companyName, complaintDb, x => x.companyName);
+	var matches = FuzzySearch.FuzzyMatch(companyName, complaintDb, x => x.CompanyName);
 	return Results.Ok(matches);
 });
 
@@ -73,17 +76,26 @@ complaintsApi.MapGet("/by-date-range", ([FromBody] DateRangeJson dateRange) =>
 	return Results.Ok(complaintsInRange);
 });
 
-complaintsApi.MapGet("/list-companies", () => {
-	var companies = complaintDb.Select(x => x.companyName).Distinct().ToList();
+complaintsApi.MapGet("/list-companies", () =>
+{
+	var companies = complaintDb.Select(x => x.CompanyName).Distinct().ToList();
 	return Results.Ok(companies);
 });
 
+complaintsApi.MapGet("/company-rating/{companyName}", (string companyName) =>
+{
+	var companyComplaints = complaintDb.Where(x => x.CompanyName.Equals(companyName));
+	var rating = new CompanyRatingJson(companyComplaints);
+	return Results.Ok(rating);
+});
 
+//
 // USERS ENDPOINTS
+//
 
 var userEndpoints = app.MapGroup("/users");
 userEndpoints.MapGet("/", () => userDb);
-userEndpoints.MapPost("/create", ([FromBody] UserJson userData) => 
+userEndpoints.MapPost("/create", ([FromBody] UserJson userData) =>
 {
 	User newUser = new User(userDb.Max(x => x.Id) + 1, userData.Username, userData.Email, userData.IpAddress, DateTime.Now);
 	userDb.Add(newUser);
@@ -93,13 +105,14 @@ userEndpoints.MapPost("/create", ([FromBody] UserJson userData) =>
 
 app.Run();
 
-public record Complaint(int Id, int UserId, string companyName, string Title, string Body, DateTime SubmittedOn, int StarRating);
+public record Complaint(int Id, int UserId, string CompanyName, string Title, string Body, DateTime SubmittedOn, int ThumbsUp, int ThumbsDown);
 public record User(int Id, string Username, string Email, string IpAddress, DateTime JoinedDate);
 
 
 [JsonSerializable(typeof(List<Complaint>))]
 [JsonSerializable(typeof(List<User>))]
 [JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(CompanyRatingJson))]
 [JsonSerializable(typeof(UserJson))]
 [JsonSerializable(typeof(ComplaintJson))]
 [JsonSerializable(typeof(DateRangeJson))]
@@ -118,7 +131,6 @@ public class ComplaintJson
 	public required string CompanyName { get; set; }
 	public required string Title { get; set; }
 	public required string Body { get; set; }
-	public required int StarRating { get; set; }
 }
 
 public class DateRangeJson
@@ -134,9 +146,38 @@ public class DateRangeJson
 	}
 }
 
+public class CompanyRatingJson
+{
+	public int ThumbsUp { get; set; }
+	public int ThumbsDown { get; set; }
+	public double StarRating { get => calcStarRating(); }
+
+	public CompanyRatingJson(IEnumerable<Complaint> complaints)
+	{
+
+		ThumbsUp = complaints.Sum(x => x.ThumbsUp);
+		ThumbsDown = complaints.Sum(x => x.ThumbsDown);
+	}
+
+	private double calcStarRating()
+	{
+		int totalVotes = ThumbsUp + ThumbsDown;
+		if (totalVotes == 0)
+		{
+			return 0.0;
+		}
+
+		double upRatio = (double)ThumbsUp / totalVotes;
+		return upRatio * 5.0;
+	}
+}
+
 public static class FuzzySearch
 {
-	public static List<T> FuzzyMatch<T, TProperty>(string searchTerm, List<T> list, Func<T, TProperty> propertySelector, int maxDistance = 2, bool ignoreCase = true)
+	public static List<T> FuzzyMatch<T>(
+		string searchTerm, List<T> list,
+		Func<T, string> propertySelector,
+		int maxDistance = 2, bool ignoreCase = true)
 	{
 		if (list == null)
 			throw new ArgumentNullException(nameof(list));
