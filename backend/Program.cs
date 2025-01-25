@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
@@ -13,7 +14,21 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 	options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+var corsName = "gripeFrontendAngular";
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy(name: corsName,
+					  policy =>
+					  {
+						  policy
+							.WithOrigins("http://localhost:4200")
+							.AllowAnyHeader()
+							.AllowAnyMethod();
+					  });
+});
+
 var app = builder.Build();
+app.UseCors(corsName);
 
 var complaintDb = new List<Complaint>()
 {
@@ -66,6 +81,7 @@ complaintsApi.MapGet("/by-user/{userId}", (int userId) =>
 
 complaintsApi.MapGet("/by-company/{companyName}", (string companyName) =>
 {
+	if (companyName == "") return Results.Ok(complaintDb);	
 	var matches = FuzzySearch.FuzzyMatch(companyName, complaintDb, x => x.CompanyName);
 	return Results.Ok(matches);
 });
@@ -78,6 +94,7 @@ complaintsApi.MapGet("/by-date-range", ([FromBody] DateRangeJson dateRange) =>
 
 complaintsApi.MapGet("/list-companies", () =>
 {
+	Console.WriteLine("test");
 	var companies = complaintDb.Select(x => x.CompanyName).Distinct().ToList();
 	return Results.Ok(companies);
 });
