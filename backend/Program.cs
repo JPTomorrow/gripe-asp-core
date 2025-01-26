@@ -33,19 +33,19 @@ app.UseCors(corsName);
 var complaintDb = new List<Complaint>()
 {
 	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   5, 3),
-	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   1, 0),
-	new Complaint(0, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   2, 2),
-	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
-	new Complaint(0, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
-	new Complaint(0, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
-	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
-	new Complaint(0, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
-	new Complaint(0, 0, "Apple", "lol", "chicken butt...", DateTime.Now,    5, 0),
-	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
-	new Complaint(0, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
+	new Complaint(1, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   1, 0),
+	new Complaint(2, 0, "Amazon", "lol", "chicken butt...", DateTime.Now,   2, 2),
+	new Complaint(3, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
+	new Complaint(4, 0, "Netflix", "lol", "chicken butt...", DateTime.Now,  5, 0),
+	new Complaint(5, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(6, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(7, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(8, 0, "Google", "lol", "chicken butt...", DateTime.Now,   5, 0),
+	new Complaint(9, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(10, 0, "Zerox", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(11, 0, "Apple", "lol", "chicken butt...", DateTime.Now,    5, 0),
+	new Complaint(12, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
+	new Complaint(13, 0, "Meta", "lol", "chicken butt...", DateTime.Now,     5, 0),
 };
 
 var userDb = new List<User>()
@@ -117,6 +117,12 @@ userEndpoints.MapPost("/create", ([FromBody] UserJson userData) =>
 	User newUser = new User(userDb.Max(x => x.Id) + 1, userData.Username, userData.Email, userData.IpAddress, DateTime.Now);
 	userDb.Add(newUser);
 	return Results.Ok(newUser);
+});
+
+userEndpoints.MapGet("/get-name/{userId}", (int userId) =>
+{
+	var name = userDb.First(x => x.Id == userId).Username;
+	return Results.Ok(name);
 });
 
 

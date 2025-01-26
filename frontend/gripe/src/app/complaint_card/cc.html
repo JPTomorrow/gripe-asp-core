@@ -1,13 +1,58 @@
 <style>
   .card {
-    border: 1px solid #333333;
     flex: 1;
     width: 500px;
-    border-radius: 20px;
-    padding: 0px 20px;
+    border-end-end-radius: 5px;
+    border-end-start-radius: 5px;
+    border-top: 5px solid #00a2ff;
+    padding: 0px 20px 20px;
+    background-color: #ffffff63;
+  }
+
+  .head-row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .thumbs {
+    display: flex;
+    gap: 20px;
+  }
+
+  .body-text {
+    font-weight: bold;
+    font-size: 1.5em;
+  }
+
+  .bottom-row {
+    display: flex;
+    justify-content: space-between;
   }
 </style>
 
 <div class="card">
-  <h1>{{complaint.title}}</h1>
+  <div class="head-row">
+    <h1>{{complaint?.title}}</h1>
+
+    <!-- thumbs up / down -->
+    <div class="thumbs">
+      <div>
+        <h1>{{complaint?.thumbsUp}}</h1>
+      </div>
+      <div>
+        <h1>{{complaint?.thumbsDown}}</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="body-text">
+    <p>{{complaint?.body}}</p>
+  </div>
+
+  <!-- bottom row -->
+  <div class="bottom-row">
+    <p>{{username}}</p>
+    <p>{{date}}</p>
+  </div>
 </div>

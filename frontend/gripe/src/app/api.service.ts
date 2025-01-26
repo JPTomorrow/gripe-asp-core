@@ -3,6 +3,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError } from 'rxjs';
 
+export interface Complaint {
+  id: number
+  userId: number
+  companyName: string 
+  title: string
+  body: string 
+  submittedOn: string
+  thumbsUp: number
+  thumbsDown: number
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private apiUrl = "http://localhost:5208"

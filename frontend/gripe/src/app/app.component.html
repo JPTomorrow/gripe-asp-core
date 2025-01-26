@@ -79,12 +79,11 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 50px;
+    gap: 25px;
   }
 
   .card {
     border: 1px solid #000;
-    border-radius: 20px;
     padding: 40px;
     backdrop-filter: blur(4px);
     background-color: rgba(255, 255, 255, 0.3);
@@ -103,28 +102,76 @@
       display: block;
     }
   }
+
+  .gripe-header {
+    font-size: 5em;
+    padding: 0;
+    margin: 0;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .btn-container {
+    display: flex;
+    height: 100%;
+    align-items: center;
+  }
+
+  .review-btn {
+    font-size: 1.5em;
+  }
+
+  .review-form {
+    display: flex;
+    position: fixed;
+    background-color: #424242df;
+    margin: 0;
+    padding: 20px;
+    min-width: 400px;
+    border-radius: 10px;
+    color: #fff;
+  }
 </style>
 
 <main class="main">
   <div class="main-header">
-    <h1>Gripe</h1>
-    <div class="card">
-      <h1>Find complaints about a company</h1>
+    <h1 class="gripe-header">Gripe</h1>
+    @if (complaints.length == 0) {
+    <h2>Find out what people think of a company recently...</h2>
+    }
+    <button mat-flat-button class="review-btn" (click)="showReviewForm($event)">
+      Leave a review
+    </button>
+    <div class="search-container">
+      <mat-form-field appearance="fill">
+        <mat-label>Select a company</mat-label>
+        <mat-select
+          [(value)]="selectedCompany"
+          (selectionChange)="handleSelectionChange($event)"
+        >
+          @for (c of companyNames; track c) {
+          <mat-option [value]="c">
+            {{ c }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
   </div>
   <div class="complaint-grid">
-    <form>
-      <select id="items">
-        <option value="" disabled selected>Choose a Company</option>
-        @for (c of companyNames; track c) {
-        <option [value]="c">
-          {{ c }}
-        </option>
-        }
-      </select>
-    </form>
-    <!-- <complaint-card [complaint]="c" /> -->
+    @for (c of complaints; track c.id) {
+    <complaint-card [complaint]="c" />
+    }
   </div>
+  @if (isShowingReviewForm) {
+  <div class="review-form">
+    <h1>Test</h1>
+  </div>
+  }
 </main>
 
 <router-outlet />

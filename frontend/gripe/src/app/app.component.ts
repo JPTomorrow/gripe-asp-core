@@ -1,22 +1,34 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ApiService } from './api.service';
+import { ApiService, Complaint } from './api.service';
 
 import { ComplaintCard } from './complaint_card/cc'
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import {MatButtonModule} from '@angular/material/button'; 
+
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ComplaintCard],
+  imports: [
+    RouterOutlet, ComplaintCard, ReactiveFormsModule,
+    MatFormFieldModule, MatSelectModule, MatButtonModule
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
   
 export class AppComponent implements OnInit {
-  title = 'gripe';
+  title = 'gripe'
   
   companyNames: string[] | undefined 
-  constructor(private apiService: ApiService) { }
+  selectedCompany = new FormControl('', Validators.required); // Validation example
+  complaints: Complaint[]
+  constructor(private apiService: ApiService) {
+    this.complaints = []
+   }
   
   ngOnInit(): void {
 
@@ -26,10 +38,19 @@ export class AppComponent implements OnInit {
     });
   }
 
-  items = [
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-  ];
-  selectedItem = new FormControl('', Validators.required); // Validation example
+  handleSelectionChange(company: any) {
+    console.log('Selected company:', company);
+    this.apiService.getData<Complaint[]>(`/complaints/by-company/${company.value}`).subscribe({
+      next: (response) => this.complaints = response,
+      error: (err) => console.error(err.message),
+    });
+  }
+
+
+  isShowingReviewForm: boolean = false
+  showReviewForm(_: any) {
+    this.isShowingReviewForm = true
+  }
+
 }
 
