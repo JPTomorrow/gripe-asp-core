@@ -4,8 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <PublishAot>true</PublishAot>
+    <!-- <InvariantGlobalization>true</InvariantGlobalization> -->
+    <!-- <PublishAot>true</PublishAot> -->
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
+  </ItemGroup>
 
 </Project>

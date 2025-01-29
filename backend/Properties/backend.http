@@ -1,0 +1,84 @@
+@backend_HostAddress = http://localhost:5208
+
+### get all complaints
+GET {{backend_HostAddress}}/complaints
+Accept: application/json
+
+### get complaint by complaint id
+GET {{backend_HostAddress}}/complaints/1 
+Accept: application/json
+
+### get complaint by complaint id (should fail cause id does not exist)
+GET {{backend_HostAddress}}/complaints/30
+Accept: application/json
+
+### create valid complaint
+POST {{backend_HostAddress}}/complaints
+Content-Type: application/json
+
+{
+    "userId": 20,
+    "companyName": "Amazon",
+    "title": "lol",
+    "body": "chicken butt..."
+}
+
+### create complaint that should error out because missing field
+POST {{backend_HostAddress}}/complaints
+Content-Type: application/json
+
+{
+    "companyName": "Amazon",
+    "title": "lol",
+    "body": "chicken butt..."
+}
+
+### get complaints by date range
+GET {{backend_HostAddress}}/complaints/date-range
+Accept: application/json
+Content-Type: application/json
+
+{
+    "startDate": "2024-01-29",
+    "endDate": "2025-01-29"
+}
+
+### get company names list
+GET {{backend_HostAddress}}/complaints/company
+Accept: application/json
+
+### get complaints by company name
+GET {{backend_HostAddress}}/complaints/company/Amazon
+Accept: application/json
+
+### get company rating
+GET {{backend_HostAddress}}/complaints/company/rating/Amazon
+Accept: application/json
+
+### get all users
+GET {{backend_HostAddress}}/users
+Accept: application/json
+
+### get user by id
+GET {{backend_HostAddress}}/users/1
+Accept: application/json
+
+### create valid user
+POST {{backend_HostAddress}}/users
+Content-Type: application/json
+
+{
+    "username": "derp",
+    "email": "derp@gmail.com",
+    "ipAddress": "192.168.1.100"
+}
+
+### create user (should fail due to missing field)
+POST {{backend_HostAddress}}/users
+Content-Type: application/json
+
+{
+    "email": "derp@gmail.com",
+    "ipAddress": "192.168.1.100"
+}
+
