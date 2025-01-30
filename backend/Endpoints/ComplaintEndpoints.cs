@@ -44,6 +44,42 @@ public static class ComplaintEndpoints
             return Results.CreatedAtRoute(GetComplaintByIdName, routeValues, newComplaint);
         });
 
+        group.MapPost("/thumbs-up/{complaintId}", (int complaintId) =>
+        {
+            var idx = complaintDb.FindIndex(x => x.Id == complaintId);
+            if (idx == -1) return Results.NotFound();
+
+            complaintDb[idx] = new(
+                complaintDb[idx].Id,
+                complaintDb[idx].UserId,
+                complaintDb[idx].CompanyName,
+                complaintDb[idx].Title,
+                complaintDb[idx].Body,
+                complaintDb[idx].SubmittedOn,
+                complaintDb[idx].ThumbsUp + 1,
+                complaintDb[idx].ThumbsDown
+            );
+            return Results.Ok(complaintDb[idx]);
+        });
+
+        group.MapPost("/thumbs-down/{complaintId}", (int complaintId) =>
+        {
+            var idx = complaintDb.FindIndex(x => x.Id == complaintId);
+            if (idx == -1) return Results.NotFound();
+
+            complaintDb[idx] = new(
+                complaintDb[idx].Id,
+                complaintDb[idx].UserId,
+                complaintDb[idx].CompanyName,
+                complaintDb[idx].Title,
+                complaintDb[idx].Body,
+                complaintDb[idx].SubmittedOn,
+                complaintDb[idx].ThumbsUp,
+                complaintDb[idx].ThumbsDown + 1
+            );
+            return Results.Ok(complaintDb[idx]);
+        });
+
         // get all complaints within a date range
         group.MapGet("/date-range", ([FromBody] DateRangeDto range) =>
         {
@@ -51,12 +87,6 @@ public static class ComplaintEndpoints
                 .Where(x => range.IsInDateRange(x.SubmittedOn)).ToList();
             return Results.Ok(complaintsInRange);
         });
-
-        // group.MapGet("/{userId}", (int userId) =>
-        // {
-        //     var complaintsByUser = complaintDb.Where(x => x.UserId == userId).ToList();
-        //     return Results.Ok(complaintsByUser);
-        // });
 
         group.MapGet("/company", () =>
         {

@@ -12,6 +12,7 @@
   .head-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 
   .thumbs {
@@ -28,6 +29,29 @@
     display: flex;
     justify-content: space-between;
   }
+
+  .thumbs-btn {
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    padding: 5px;
+    background-color: transparent;
+    border: 1px solid #000;
+    border-radius: 5px;
+  }
+
+  .thumbs-btn:hover {
+    background-color: #00000068;
+  }
+
+  .thumbs-btn h1 {
+    margin: 0;
+    padding: 0;
+  }
+
+  .thumbs-btn-icon {
+    width: 30px;
+  }
 </style>
 
 <div class="card">
@@ -36,12 +60,18 @@
 
     <!-- thumbs up / down -->
     <div class="thumbs">
-      <div>
+      <button class="thumbs-btn" (click)="handleThumbsUp()" [disabled]="voted">
+        <tabler-icon class="thumbs-btn-icon" name="thumb-up" />
         <h1>{{complaint?.thumbsUp}}</h1>
-      </div>
-      <div>
+      </button>
+      <button
+        class="thumbs-btn"
+        (click)="handleThumbsDown()"
+        [disabled]="voted"
+      >
+        <tabler-icon class="thumbs-btn-icon" name="thumb-down" />
         <h1>{{complaint?.thumbsDown}}</h1>
-      </div>
+      </button>
     </div>
   </div>
 

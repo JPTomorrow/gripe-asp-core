@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
   
   ngOnInit(): void {
 
-    this.apiService.getData<string[]>("/complaints/list-companies").subscribe({
+    this.apiService.getData<string[]>("/complaints/company").subscribe({
       next: (response) => this.companyNames = response,
       error: (err) => console.error(err.message),
     });
@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
 
   handleSelectionChange(company: any) {
     console.log('Selected company:', company);
-    this.apiService.getData<Complaint[]>(`/complaints/by-company/${company.value}`).subscribe({
+    this.apiService.getData<Complaint[]>(`/complaints/company/${company.value}`).subscribe({
       next: (response) => this.complaints = response,
       error: (err) => console.error(err.message),
     });
