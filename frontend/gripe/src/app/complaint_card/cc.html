@@ -28,6 +28,7 @@
   .bottom-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 
   .thumbs-btn {
@@ -52,9 +53,14 @@
   .thumbs-btn-icon {
     width: 30px;
   }
+
+  .date-submitted {
+    text-decoration: underline;
+    font-size: small;
+  }
 </style>
 
-<div class="card">
+<div [@fade-in]="this.isShowing ? 'show' : 'hidden'" class="card">
   <div class="head-row">
     <h1>{{complaint?.title}}</h1>
 
@@ -82,7 +88,7 @@
 
   <!-- bottom row -->
   <div class="bottom-row">
-    <p>{{username}}</p>
-    <p>{{date}}</p>
+    <p>User: {{username}}</p>
+    <p class="date-submitted">{{date}}</p>
   </div>
 </div>

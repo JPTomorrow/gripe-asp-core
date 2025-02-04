@@ -8,8 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatButtonModule} from '@angular/material/button'; 
 
-
-
 @Component({
   selector: 'app-root',
   imports: [
@@ -17,7 +15,7 @@ import {MatButtonModule} from '@angular/material/button';
     MatFormFieldModule, MatSelectModule, MatButtonModule
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
   
 export class AppComponent implements OnInit {
@@ -51,6 +49,9 @@ export class AppComponent implements OnInit {
   showReviewForm(_: any) {
     this.isShowingReviewForm = true
   }
+
+  // animations
+  
 
 }
 
