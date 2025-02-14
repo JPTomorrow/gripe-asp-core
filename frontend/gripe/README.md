@@ -21,3 +21,8 @@ For a complete list of available schematics (such as `components`, `directives`,
 ```bash
 ng generate --help
 ```
+
+Generate Docker Container for prod
+```
+
+```
