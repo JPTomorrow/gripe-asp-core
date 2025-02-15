@@ -1,48 +1,50 @@
+using System.Data.Common;
 using Gripe.Api.Dtos;
 
 public static class UserEndpoints
 {
     private const string GetUserByIdName = "GetUserById";
+    private static List<UserDto> _userDb = InMemoryDatabases.UserDb;
 
     public static RouteGroupBuilder MapUserEndpoints(this WebApplication app)
     {
-        var userDb = InMemoryDatabases.UserDb;
         var group = app.MapGroup("/users")
                         .WithParameterValidation();
 
-        // get all users
-        group.MapGet("/", () =>
-        {
-            return Results.Ok(userDb);
-        });
+        group.MapGet("/", GetAllUsers);
+        group.MapGet("/{id}", GetUserById).WithName(GetUserByIdName);
+        group.MapPost("/", CreateUser);
 
-        // get user by id
-        group.MapGet("/{id}", (int id) =>
-        {
-            var user = userDb.FirstOrDefault(x => x.Id == id);
-            return user != null
-                ? Results.Ok(user)
-                : Results.NotFound();
-        }).WithName(GetUserByIdName);
+        return group;
+    }
 
-        // create new user
-        group.MapPost("/", (CreateUserDto userData) =>
-        {
-            UserDto newUser = new(
-                userDb.Max(x => x.Id) + 1,
-                userData.Username,
-                userData.Email,
-                userData.IpAddress,
-                DateOnly.FromDateTime(DateTime.Now));
+    private static IResult GetAllUsers()
+    {
+        return Results.Ok(_userDb);
+    }
 
-            userDb.Add(newUser);
-            var routeValues = new RouteValueDictionary
+    private static IResult GetUserById(int id)
+    {
+        var user = _userDb.FirstOrDefault(x => x.Id == id);
+        return user != null
+            ? Results.Ok(user)
+            : Results.NotFound();
+    }
+
+    private static IResult CreateUser(CreateUserDto userData)
+    {
+        UserDto newUser = new(
+            _userDb.Max(x => x.Id) + 1,
+            userData.Username,
+            userData.Email,
+            userData.IpAddress,
+            DateOnly.FromDateTime(DateTime.Now));
+
+        _userDb.Add(newUser);
+        var routeValues = new RouteValueDictionary
             {
                 { "id", newUser.Id }
             };
-            return Results.CreatedAtRoute(GetUserByIdName, routeValues, newUser);
-        });
-
-        return group;
+        return Results.CreatedAtRoute(GetUserByIdName, routeValues, newUser);
     }
 }

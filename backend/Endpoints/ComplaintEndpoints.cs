@@ -5,110 +5,118 @@ using Microsoft.AspNetCore.Mvc;
 public static class ComplaintEndpoints
 {
     private const string GetComplaintByIdName = "GetComplaintById";
+    private static List<ComplaintDto> _complaintDb = InMemoryDatabases.ComplaintDb;
+
 
     public static RouteGroupBuilder MapComplaintEndpoints(this WebApplication app)
     {
-        var complaintDb = InMemoryDatabases.ComplaintDb;
         var group = app.MapGroup("/complaints")
                         .WithParameterValidation();
 
-        // get all complaints
-        group.MapGet("/", () =>
-        {
-            return Results.Ok(complaintDb);
-        });
+        group.MapGet("/", GetAllComplaints);
+        group.MapGet("/{id}", GetComplaintById).WithName(GetComplaintByIdName);
+        group.MapPost("/", CreateComplaint);
+        group.MapPost("/thumbs-up/{complaintId}", ThumbsUpComplaint);
+        group.MapPost("/thumbs-down/{complaintId}", ThumbsDownComplaint);
+        group.MapGet("/date-range", ComplaintsByDateRange);
+        group.MapGet("/company", ListCompanyNames);
+        group.MapGet("/company/{companyName}", ComplaintsByCompany);
+        group.MapGet("/company/rating/{companyName}", GetCompanyStarRating);
 
-        // get complaint by ID
-        group.MapGet("/{id}", (int id) =>
-        {
-            var complaint = complaintDb.FirstOrDefault(a => a.Id == id);
-            return complaint != null
-                ? Results.Ok(complaint)
-                : Results.NotFound();
-        }).WithName(GetComplaintByIdName);
+        return group;
+    }
 
-        group.MapPost("/", (CreateComplaintDto cData) =>
-        {
-            ComplaintDto newComplaint = new(
-                complaintDb.Max(x => x.Id) + 1,
-                cData.UserId!.Value,
-                cData.CompanyName,
-                cData.Title,
-                cData.Body,
-                DateOnly.FromDateTime(DateTime.Now),
-                0, 0);
+    private static IResult GetAllComplaints()
+    {
+        return Results.Ok(_complaintDb);
+    }
 
-            complaintDb.Add(newComplaint);
-            var routeValues = new RouteValueDictionary
+    private static IResult GetComplaintById(int id)
+    {
+        var complaint = _complaintDb.FirstOrDefault(a => a.Id == id);
+        return complaint != null
+            ? Results.Ok(complaint)
+            : Results.NotFound();
+    }
+
+    private static IResult CreateComplaint(CreateComplaintDto cData)
+    {
+        ComplaintDto newComplaint = new(
+            _complaintDb.Max(x => x.Id) + 1,
+            cData.UserId!.Value,
+            cData.CompanyName,
+            cData.Title,
+            cData.Body,
+            DateOnly.FromDateTime(DateTime.Now),
+            0, 0);
+
+        _complaintDb.Add(newComplaint);
+        var routeValues = new RouteValueDictionary
             {
                 { "id", newComplaint.Id }
             };
-            return Results.CreatedAtRoute(GetComplaintByIdName, routeValues, newComplaint);
-        });
+        return Results.CreatedAtRoute(GetComplaintByIdName, routeValues, newComplaint);
+    }
 
-        group.MapPost("/thumbs-up/{complaintId}", (int complaintId) =>
-        {
-            var idx = complaintDb.FindIndex(x => x.Id == complaintId);
-            if (idx == -1) return Results.NotFound();
+    private static IResult ThumbsUpComplaint(int complaintId)
+    {
+        var idx = _complaintDb.FindIndex(x => x.Id == complaintId);
+        if (idx == -1) return Results.NotFound();
 
-            complaintDb[idx] = new(
-                complaintDb[idx].Id,
-                complaintDb[idx].UserId,
-                complaintDb[idx].CompanyName,
-                complaintDb[idx].Title,
-                complaintDb[idx].Body,
-                complaintDb[idx].SubmittedOn,
-                complaintDb[idx].ThumbsUp + 1,
-                complaintDb[idx].ThumbsDown
-            );
-            return Results.Ok(complaintDb[idx]);
-        });
+        _complaintDb[idx] = new(
+            _complaintDb[idx].Id,
+            _complaintDb[idx].UserId,
+            _complaintDb[idx].CompanyName,
+            _complaintDb[idx].Title,
+            _complaintDb[idx].Body,
+            _complaintDb[idx].SubmittedOn,
+            _complaintDb[idx].ThumbsUp + 1,
+            _complaintDb[idx].ThumbsDown
+        );
+        return Results.Ok(_complaintDb[idx]);
+    }
 
-        group.MapPost("/thumbs-down/{complaintId}", (int complaintId) =>
-        {
-            var idx = complaintDb.FindIndex(x => x.Id == complaintId);
-            if (idx == -1) return Results.NotFound();
+    private static IResult ThumbsDownComplaint(int complaintId)
+    {
+        var idx = _complaintDb.FindIndex(x => x.Id == complaintId);
+        if (idx == -1) return Results.NotFound();
 
-            complaintDb[idx] = new(
-                complaintDb[idx].Id,
-                complaintDb[idx].UserId,
-                complaintDb[idx].CompanyName,
-                complaintDb[idx].Title,
-                complaintDb[idx].Body,
-                complaintDb[idx].SubmittedOn,
-                complaintDb[idx].ThumbsUp,
-                complaintDb[idx].ThumbsDown + 1
-            );
-            return Results.Ok(complaintDb[idx]);
-        });
+        _complaintDb[idx] = new(
+            _complaintDb[idx].Id,
+            _complaintDb[idx].UserId,
+            _complaintDb[idx].CompanyName,
+            _complaintDb[idx].Title,
+            _complaintDb[idx].Body,
+            _complaintDb[idx].SubmittedOn,
+            _complaintDb[idx].ThumbsUp,
+            _complaintDb[idx].ThumbsDown + 1
+        );
+        return Results.Ok(_complaintDb[idx]);
+    }
 
-        // get all complaints within a date range
-        group.MapGet("/date-range", ([FromBody] DateRangeDto range) =>
-        {
-            var complaintsInRange = complaintDb
-                .Where(x => range.IsInDateRange(x.SubmittedOn)).ToList();
-            return Results.Ok(complaintsInRange);
-        });
+    private static IResult ComplaintsByDateRange([FromBody] DateRangeDto range)
+    {
+        var complaintsInRange = _complaintDb
+            .Where(x => range.IsInDateRange(x.SubmittedOn)).ToList();
+        return Results.Ok(complaintsInRange);
+    }
 
-        group.MapGet("/company", () =>
-        {
-            var companies = complaintDb.Select(x => x.CompanyName).Distinct().ToList();
-            return Results.Ok(companies);
-        });
+    private static IResult ListCompanyNames()
+    {
+        var companies = _complaintDb.Select(x => x.CompanyName).Distinct().ToList();
+        return Results.Ok(companies);
+    }
 
-        group.MapGet("/company/{companyName}", (string companyName) =>
-        {
-            var matches = FuzzySearch.MatchAll(companyName, complaintDb, x => x.CompanyName);
-            return Results.Ok(matches);
-        });
+    private static IResult ComplaintsByCompany(string companyName)
+    {
+        var matches = FuzzySearch.MatchAll(companyName, _complaintDb, x => x.CompanyName);
+        return Results.Ok(matches);
+    }
 
-        group.MapGet("/company/rating/{companyName}", (string companyName) =>
-        {
-            var companyComplaints = complaintDb.Where(x => x.CompanyName.Equals(companyName));
-            var rating = companyComplaints.CalcStarRating();
-            return Results.Ok(rating);
-        });
-
-        return group;
+    private static IResult GetCompanyStarRating(string companyName)
+    {
+        var companyComplaints = _complaintDb.Where(x => x.CompanyName.Equals(companyName));
+        var rating = companyComplaints.CalcStarRating();
+        return Results.Ok(rating);
     }
 }
