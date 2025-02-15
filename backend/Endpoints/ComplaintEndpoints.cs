@@ -12,11 +12,13 @@ public static class ComplaintEndpoints
         var group = app.MapGroup("/complaints")
                         .WithParameterValidation();
 
+        // get all complaints
         group.MapGet("/", () =>
         {
             return Results.Ok(complaintDb);
         });
 
+        // get complaint by ID
         group.MapGet("/{id}", (int id) =>
         {
             var complaint = complaintDb.FirstOrDefault(a => a.Id == id);

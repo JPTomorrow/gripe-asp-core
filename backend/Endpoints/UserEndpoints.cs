@@ -13,7 +13,7 @@ public static class UserEndpoints
         // get all users
         group.MapGet("/", () =>
         {
-            Results.Ok(userDb);
+            return Results.Ok(userDb);
         });
 
         // get user by id

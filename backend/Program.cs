@@ -3,26 +3,34 @@
  * Backend
  */
 
-var builder = WebApplication.CreateSlimBuilder(args);
-
-var corsName = "gripeFrontendAngular";
-builder.Services.AddCors(options =>
+public partial class Program
 {
-	options.AddPolicy(name: corsName,
-					  policy =>
-					  {
-						  policy
-							.WithOrigins("http://localhost:4200") // angular frontend
-							.AllowAnyHeader()
-							.AllowAnyMethod();
-					  });
-});
+	public static void Main(string[] args)
+	{
+		Console.WriteLine("Starting Gripe api");
+		var builder = WebApplication.CreateSlimBuilder(args);
 
-var app = builder.Build();
-app.UseCors(corsName);
+		var corsName = "gripeFrontendAngular";
+		builder.Services.AddCors(options =>
+		{
+			options.AddPolicy(name: corsName,
+							policy =>
+							{
+								policy
+									.WithOrigins("http://localhost:4200") // angular frontend
+									.AllowAnyHeader()
+									.AllowAnyMethod();
+							});
+		});
 
-// init endpoints
-app.MapComplaintEndpoints();
-app.MapUserEndpoints();
+		var app = builder.Build();
+		app.UseCors(corsName);
 
-app.Run();
+		// init endpoints
+		app.MapGet("/", () => "Welcome to the Gripe backend API!");
+		app.MapComplaintEndpoints();
+		app.MapUserEndpoints();
+
+		app.Run();
+	}
+}
